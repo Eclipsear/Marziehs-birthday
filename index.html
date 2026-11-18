@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#f8f0ee">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="for Marzieh">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<title>for Marzieh</title>
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    color-scheme: light;
+    --paper: #f8f0ee; --ink: #5a3a48; --rose: #e58aa3; --blush: #f2c4cf;
+    --sage: #cddcc6; --lilac: #ddd0ea; --butter: #f6e6b8;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden; overscroll-behavior: none; }
+  body {
+    position: fixed; inset: 0; width: 100%; background: var(--paper); color: var(--ink);
+    font-family: "Gaegu", "Bradley Hand", "Segoe Print", "Chalkboard SE", cursive;
+    touch-action: manipulation; -webkit-text-size-adjust: 100%;
+  }
+  body::after {
+    content: ""; position: fixed; inset: 0; pointer-events: none; mix-blend-mode: multiply; opacity: .5;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .4 0 0 0 0 .3 0 0 0 0 .33 0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .blob { position: fixed; filter: blur(46px); opacity: .6; pointer-events: none; z-index: 0; }
+  .b1 { width: 52vmax; height: 46vmax; left: -18vmax; top: -14vmax; background: var(--blush); border-radius: 42% 58% 63% 37% / 45% 40% 60% 55%; }
+  .b2 { width: 40vmax; height: 38vmax; right: -14vmax; top: 18vh; background: var(--lilac); border-radius: 60% 40% 35% 65% / 55% 60% 40% 45%; opacity: .5; }
+  .b3 { width: 46vmax; height: 36vmax; left: 10vw; bottom: -18vmax; background: var(--sage); border-radius: 38% 62% 50% 50% / 60% 38% 62% 40%; opacity: .5; }
+  .b4 { width: 24vmax; height: 22vmax; right: 8vw; bottom: 4vh; background: var(--butter); border-radius: 55% 45% 40% 60% / 50% 55% 45% 50%; opacity: .55; }
+
+  .doodle { position: fixed; z-index: 0; pointer-events: none; opacity: .5; }
+
+  .wrap {
+    position: relative; z-index: 1; height: 100%; display: grid; grid-template-rows: auto minmax(0, 1fr) auto;
+    padding: calc(clamp(18px, 5vh, 56px) + env(safe-area-inset-top, 0px)) clamp(22px, 7vw, 90px) calc(clamp(16px, 4vh, 48px) + env(safe-area-inset-bottom, 0px));
+  }
+  h1 { margin: 0; font-weight: 700; font-size: clamp(2.2rem, min(9.5vw, 8vh), 4.8rem); line-height: 1.05; transform: rotate(-2.5deg); transform-origin: left top; }
+  h1 small { display: block; font-weight: 300; font-size: .55em; margin-left: .15em; transform: rotate(1.5deg); }
+  h1 svg { display: block; width: min(250px, 55vw); height: 14px; margin: 2px 0 0 4px; }
+
+  .stage { min-height: 0; display: flex; align-items: center; padding: 1.5vh 0; }
+  #note {
+    margin: 0 0 0 clamp(0px, 5vw, 110px); width: min(17em, 100%);
+    font-size: clamp(1.6rem, 5.4vw, 2.8rem); line-height: 1.3; font-weight: 400;
+    transform: rotate(-.8deg); transition: opacity .6s ease; overflow-wrap: break-word; text-wrap: pretty;
+  }
+  #note.out { opacity: 0; }
+  #note.intro { font-weight: 300; opacity: .85; }
+  .w { display: inline-block; opacity: 0; animation: ink 1.1s ease forwards; animation-delay: calc(var(--i) * 70ms); }
+  @keyframes ink { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: none; } }
+
+  footer { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; }
+  .sig { font-size: clamp(1.2rem, 4vw, 1.8rem); font-weight: 300; transform: rotate(-3deg); opacity: .8; padding-bottom: 8px; }
+  .press { display: flex; align-items: flex-end; gap: 4px; }
+  .hint { font-size: 1.5rem; font-weight: 300; transform: rotate(-6deg); transition: opacity 1s; padding-bottom: 54px; white-space: nowrap; }
+  .hint svg { width: 46px; height: 28px; vertical-align: bottom; margin-left: 2px; }
+  .hint.gone { opacity: 0; }
+  @media (max-width: 560px) { .hint { display: none; } }
+
+  #heart { background: none; border: 0; padding: 6px; cursor: pointer; transform: rotate(5deg); transition: transform .35s ease; -webkit-tap-highlight-color: transparent; }
+  #heart svg { width: clamp(92px, min(24vw, 15vh), 140px); height: auto; display: block; overflow: visible; }
+  #heart:hover { transform: rotate(-3deg) scale(1.04); }
+  #heart:active { transform: rotate(2deg) scale(.95); }
+  #heart:focus-visible, #music:focus-visible { outline: 2px dashed var(--ink); outline-offset: 6px; border-radius: 24px; }
+
+  #music {
+    position: fixed; z-index: 40; top: calc(8px + env(safe-area-inset-top, 0px)); right: 8px; width: 48px; height: 48px;
+    background: none; border: 0; padding: 8px; cursor: pointer; opacity: .8; -webkit-tap-highlight-color: transparent;
+  }
+  #music svg { width: 100%; height: 100%; display: block; }
+  #music .strike { display: none; }
+  #music.off .strike { display: inline; }
+  #music.off { opacity: .5; }
+
+  .left { display: flex; align-items: flex-end; gap: clamp(10px, 3vw, 22px); }
+  .left .sig { max-width: 6em; }
+  .envelope {
+    background: none; border: 0; padding: 0; cursor: pointer; display: flex; flex-direction: column; align-items: center;
+    font: inherit; color: inherit; transform: rotate(-6deg); opacity: .95; transition: transform .3s ease, opacity .3s ease; animation: wiggle 5s ease-in-out infinite;
+    -webkit-tap-highlight-color: transparent; padding-bottom: 6px;
+  }
+  .envelope svg { width: clamp(52px, 14vw, 68px); height: auto; display: block; filter: drop-shadow(0 0 7px rgba(229, 138, 163, .75)); }
+  .envelope span { font-size: .95rem; line-height: 1.05; font-weight: 400; text-align: center; max-width: 6em; margin-top: 2px; }
+  .envelope .tap { color: #d44a7e; font-weight: 700; font-size: 1.2rem; }
+  @keyframes wiggle { 0%, 84%, 100% { transform: rotate(-6deg); } 88% { transform: rotate(4deg) scale(1.06); } 92% { transform: rotate(-13deg); } 96% { transform: rotate(0deg); } }
+  .envelope:hover { animation: none; transform: rotate(2deg) scale(1.06); opacity: 1; }
+  .envelope:focus-visible, .x:focus-visible, #again:focus-visible { outline: 2px dashed var(--ink); outline-offset: 5px; border-radius: 12px; }
+
+  .overlay {
+    position: fixed; inset: 0; z-index: 20; display: flex; align-items: center; justify-content: center;
+    padding: calc(22px + env(safe-area-inset-top, 0px)) 14px calc(18px + env(safe-area-inset-bottom, 0px));
+    background: rgba(248, 240, 238, .78); -webkit-backdrop-filter: blur(7px); backdrop-filter: blur(7px);
+    visibility: hidden; opacity: 0; transition: opacity .5s ease, visibility 0s linear .5s;
+  }
+  .overlay.open { visibility: visible; opacity: 1; transition: opacity .5s ease; }
+  .sheet {
+    position: relative; width: min(560px, 100%); max-height: 100%; display: flex;
+    transform: translateY(22px) rotate(-3deg) scale(.96); transition: transform .8s cubic-bezier(.2, .8, .3, 1);
+  }
+  .overlay.open .sheet { transform: rotate(-.8deg); }
+  .sheet::before {
+    content: ""; position: absolute; top: -12px; left: 50%; width: 92px; height: 26px; margin-left: -46px; z-index: 2;
+    background: rgba(246, 230, 184, .88); transform: rotate(3deg); box-shadow: 0 1px 3px rgba(90, 58, 72, .15);
+  }
+  .paper {
+    --fs: clamp(1.2rem, 4.7vw, 1.5rem); font-size: var(--fs); line-height: 1.5; width: 100%; min-height: 0; flex: 1;
+    overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+    padding: 3em 1.3em 1.5em 1.9em; border-radius: 5px 11px 6px 13px; background-color: #fffafa; background-attachment: local;
+    background-image:
+      linear-gradient(90deg, transparent 1.2em, rgba(229, 138, 163, .5) 1.2em calc(1.2em + 1.5px), transparent calc(1.2em + 1.5px)),
+      repeating-linear-gradient(transparent 0 calc(1.5em - 1px), rgba(140, 160, 200, .28) calc(1.5em - 1px) 1.5em);
+    box-shadow: 0 14px 40px rgba(90, 58, 72, .22);
+  }
+  .lp { margin: 0 0 1.5em; opacity: 0; animation: ink 1.3s ease forwards; overflow-wrap: break-word; }
+  .lp.greet { font-weight: 700; font-size: 1.15em; }
+  .lp.ps { font-weight: 300; }
+  .lp.sign { white-space: pre-line; text-align: right; transform: rotate(-1.5deg); }
+  #again {
+    font: inherit; color: var(--ink); background: none; border: 0; padding: 0; cursor: pointer; display: block; margin: 0 0 1.5em auto;
+    text-decoration: underline wavy var(--rose) 2px; text-underline-offset: 5px; -webkit-tap-highlight-color: transparent;
+  }
+  .x {
+    position: absolute; top: -18px; left: -4px; z-index: 3; width: 46px; height: 46px; border-radius: 50%; border: 0; padding: 12px;
+    background: #fffafa; box-shadow: 0 3px 10px rgba(90, 58, 72, .22); cursor: pointer; -webkit-tap-highlight-color: transparent;
+  }
+  .x svg { width: 100%; height: 100%; display: block; }
+
+  .install { z-index: 35; }
+  .steps { font-size: clamp(1.25rem, 4.8vw, 1.6rem); line-height: 1.4; margin: 0 0 3.5vh; }
+  .gate[hidden] { display: none !important; }
+  .gate {
+    position: fixed; inset: 0; z-index: 30; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+    padding: calc(24px + env(safe-area-inset-top, 0px)) 22px calc(24px + env(safe-area-inset-bottom, 0px)); transition: opacity .7s ease;
+    background:
+      radial-gradient(circle at 12% 8%, rgba(242, 196, 207, .85), transparent 46%),
+      radial-gradient(circle at 92% 88%, rgba(221, 208, 234, .85), transparent 50%),
+      radial-gradient(circle at 25% 105%, rgba(205, 220, 198, .8), transparent 46%),
+      var(--paper);
+  }
+  .gate.fade { opacity: 0; pointer-events: none; }
+  .gdots { height: 1.7em; font-size: 1.6rem; color: var(--rose); letter-spacing: .32em; margin-bottom: 3vh; }
+  .gcard { display: flex; flex-direction: column; align-items: center; width: min(480px, 100%); animation: ink .8s ease both; transition: opacity .38s ease, transform .38s ease; }
+  .gcard.leave { opacity: 0; transform: translateY(-10px); }
+  .gq { margin: 0 0 3vh; font-weight: 700; font-size: clamp(2rem, 8.5vw, 3.2rem); line-height: 1.15; transform: rotate(-1.2deg); overflow-wrap: break-word; }
+  .shake { animation: shake .5s ease; }
+  @keyframes shake { 0%, 100% { transform: rotate(-1.2deg) translateX(0); } 20% { transform: rotate(-1.2deg) translateX(-9px); } 40% { transform: rotate(-1.2deg) translateX(9px); } 60% { transform: rotate(-1.2deg) translateX(-6px); } 80% { transform: rotate(-1.2deg) translateX(6px); } }
+  .choices { position: relative; width: 100%; height: 110px; display: flex; align-items: center; justify-content: center; gap: 22px; }
+  .choices.tall { height: 210px; }
+  .gbtn {
+    font: inherit; font-size: clamp(1.4rem, 5.4vw, 1.8rem); color: var(--ink); background: #fffafa; border: 2.5px solid var(--ink); cursor: pointer;
+    padding: .3em 1.1em; border-radius: 22px 30px 24px 32px / 30px 22px 32px 24px; box-shadow: 3px 4px 0 rgba(90, 58, 72, .25);
+    transition: transform .25s ease, opacity .6s ease; -webkit-tap-highlight-color: transparent;
+  }
+  .gbtn.yes { background: var(--blush); }
+  .gbtn:active { box-shadow: 1px 2px 0 rgba(90, 58, 72, .25); }
+  .gbtn:focus-visible { outline: 2px dashed var(--ink); outline-offset: 5px; }
+  .gbtn[hidden] { display: none; }
+  .gbtn.gone { opacity: 0; transform: translate(90px, -140px) rotate(25deg) scale(.4) !important; pointer-events: none; }
+  .gmsg { margin: 2.5vh 0 0; min-height: 3.2em; font-size: clamp(1.2rem, 4.6vw, 1.6rem); color: #c23b6c; }
+
+  .petal {
+    position: fixed; top: -30px; z-index: 2; pointer-events: none; opacity: 0;
+    border-radius: 100% 0 100% 0; animation: fall var(--d) ease-in-out forwards;
+  }
+  @keyframes fall {
+    0% { opacity: 0; transform: translate3d(0, 0, 0) rotate(0); }
+    12% { opacity: .75; }
+    50% { transform: translate3d(var(--sx), 55vh, 0) rotate(var(--r)); }
+    100% { opacity: 0; transform: translate3d(calc(var(--sx) * -.5), 112vh, 0) rotate(calc(var(--r) * 2)); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .w, .lp { animation: none; opacity: 1; } .petal { display: none; } #note { transition: none; }
+    .sheet { transition: none; } .envelope { animation: none; } .shake { animation: none !important; }
+  }
+</style>
+</head>
+<body>
+  <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div>
+
+  <!-- little hand-drawn doodles, a bit wonky on purpose -->
+  <svg class="doodle" style="right:20vw; top:10vh; width:76px; transform:rotate(14deg)" viewBox="0 0 80 80" fill="none" stroke="#5a3a48" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+    <ellipse cx="40" cy="20" rx="10" ry="15" fill="#f2c4cf" fill-opacity=".6"/><ellipse cx="59" cy="34" rx="10" ry="14" transform="rotate(68 59 34)" fill="#f2c4cf" fill-opacity=".6"/>
+    <ellipse cx="52" cy="57" rx="11" ry="14" transform="rotate(145 52 57)" fill="#f2c4cf" fill-opacity=".6"/><ellipse cx="28" cy="57" rx="10" ry="15" transform="rotate(-150 28 57)" fill="#f2c4cf" fill-opacity=".6"/>
+    <ellipse cx="21" cy="34" rx="10" ry="14" transform="rotate(-70 21 34)" fill="#f2c4cf" fill-opacity=".6"/><circle cx="40" cy="40" r="7" fill="#f6e6b8" fill-opacity=".9"/>
+  </svg>
+  <svg class="doodle" style="left:4vw; bottom:22vh; width:42px; transform:rotate(-12deg)" viewBox="0 0 40 40" fill="none" stroke="#5a3a48" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+    <path d="M20 3 C21 14, 25 18, 37 20 C26 22, 21 27, 19 38 C18 26, 14 22, 3 20 C15 18, 19 13, 20 3"/>
+  </svg>
+  <svg class="doodle" style="right:3vw; top:52vh; width:56px; transform:rotate(30deg); opacity:.4" viewBox="0 0 60 80" fill="none" stroke="#5a3a48" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+    <path d="M30 78 C28 55, 31 30, 30 6"/><path d="M30 60 C14 56, 10 46, 12 36 C24 38, 30 48, 30 60" fill="#cddcc6" fill-opacity=".8"/>
+    <path d="M30 40 C46 36, 50 26, 48 16 C36 18, 30 28, 30 40" fill="#cddcc6" fill-opacity=".8"/>
+  </svg>
+
+  <button id="music" class="off" aria-label="Turn the soft music on or off">
+    <svg viewBox="0 0 40 40" fill="none" stroke="#5a3a48" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M15 29 L15 9 C21 11, 27 10, 30 14 L30 26"/><ellipse cx="11.5" cy="30" rx="5" ry="3.6" fill="#f2c4cf" fill-opacity=".8"/><ellipse cx="26.5" cy="27" rx="5" ry="3.6" fill="#f2c4cf" fill-opacity=".8"/>
+      <path class="strike" d="M5 36 L35 5" stroke="#e58aa3" stroke-width="3"/>
+    </svg>
+  </button>
+
+  <div class="wrap">
+    <h1>
+      <small>happy birthday,</small>
+      Marzieh
+      <svg viewBox="0 0 250 14" fill="none" stroke="#e58aa3" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M3 8 C30 2, 50 12, 80 7 S130 3, 160 8 S215 11, 247 5"/></svg>
+    </h1>
+
+    <div class="stage" id="stage">
+      <p id="note" class="intro" aria-live="polite">i wrote you some things. tap the heart as many times as you like.</p>
+    </div>
+
+    <footer>
+      <div class="left">
+        <div class="sig">with all my love</div>
+        <button class="envelope" id="envelope" aria-label="A letter, for when you need it">
+          <svg viewBox="0 0 60 46" fill="none" stroke="#5a3a48" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M5 8 C20 6, 42 7, 55 6 L54 39 C40 41, 22 40, 6 41 Z" fill="#fffafa"/>
+            <path d="M5 9 C18 20, 26 28, 30 28 C34 28, 42 20, 55 7"/>
+            <path d="M6 40 C14 31, 20 26, 24 24"/><path d="M54 38 C47 31, 42 26, 37 24"/>
+            <path d="M30 34 C26 30, 24 28, 25.5 25.5 C27 23.5, 29.5 24.5, 30 26.5 C30.5 24.5, 33 23.5, 34.5 25.5 C36 28, 34 30, 30 34 Z" fill="#e58aa3" stroke-width="1.5"/>
+          </svg>
+          <span class="tap">tap me</span>
+          <span>a letter for later</span>
+        </button>
+      </div>
+      <div class="press">
+        <div class="hint" id="hint">press me
+          <svg viewBox="0 0 46 28" fill="none" stroke="#5a3a48" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 4 C20 2, 34 8, 40 22"/><path d="M33 19 L40 23 L42 14"/></svg>
+        </div>
+        <button id="heart" aria-label="Tell me something lovely">
+          <svg viewBox="0 0 120 112" aria-hidden="true">
+            <path d="M60 100 C24 74, 8 52, 18 32 C28 12, 52 14, 60 34 C70 12, 96 14, 104 36 C112 56, 92 78, 60 102 Z" fill="#ec93aa" fill-opacity=".85" transform="translate(4 4)"/>
+            <path d="M58 98 C22 72, 6 50, 17 30 C27 11, 50 13, 59 32 C69 11, 94 12, 103 33 C111 54, 90 77, 61 100" fill="none" stroke="#5a3a48" stroke-width="2.6" stroke-linecap="round"/>
+            <path d="M63 96 C32 76, 15 55, 22 37" fill="none" stroke="#5a3a48" stroke-width="1.3" stroke-linecap="round" opacity=".45"/>
+            <path d="M30 36 C32 30, 36 27, 42 26" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".8"/>
+          </svg>
+        </button>
+      </div>
+    </footer>
+  </div>
+
+  <div class="gate install" id="install" hidden role="dialog" aria-modal="true" aria-label="Keep me on your phone">
+    <div class="gcard">
+      <h2 class="gq">want me to work without wifi? 💗</h2>
+      <p class="steps">tap the share button (the little square with the arrow),<br>then “Add to Home Screen”.<br>open me from there, and I’ll always be with you.</p>
+      <div class="choices"><button class="gbtn yes" id="installLater">okay, later</button></div>
+    </div>
+  </div>
+
+  <div class="gate" id="gate" hidden role="dialog" aria-modal="true" aria-label="A few questions first">
+    <div class="gdots" id="gdots" aria-hidden="true"></div>
+    <div class="gcard" id="gcard">
+      <h2 class="gq" id="gq"></h2>
+      <div class="choices" id="choices">
+        <button class="gbtn yes" id="gyes"></button>
+        <button class="gbtn" id="gno"></button>
+      </div>
+      <p class="gmsg" id="gmsg" aria-live="polite"></p>
+    </div>
+  </div>
+
+  <div class="overlay" id="overlay" aria-hidden="true">
+    <div class="sheet" role="dialog" aria-modal="true" aria-label="A letter for you">
+      <button class="x" id="closeLetter" aria-label="Close the letter">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#5a3a48" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M5 6 C10 10, 14 14, 19 18"/><path d="M18 5 C14 10, 10 14, 6 19"/></svg>
+      </button>
+      <div class="paper" id="paper">
+        <div id="letterBody"></div>
+        <button id="again">another letter, please</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // ✏️ Your own words go here: inside jokes, memories, little things only you two know.
+  // They get mixed in with the rest now and then. Example: "Remember the night we ... I still smile."
+  const ONLY_YOU = [];
+
+  const pick = a => a[Math.floor(Math.random() * a.length)];
+  const two = a => { const x = pick(a); let y = pick(a); while (y === x) y = pick(a); return [x, y]; };
+
+  const doing = ["laugh", "listen so carefully", "light up when you talk about what you love", "check in on people",
+    "remember the tiny things", "care so quietly and so completely", "show up for people", "get excited about other people’s good news",
+    "stay yourself no matter who’s watching", "tell a story", "cheer people on", "turn a bad day into something funny",
+    "make everyone feel chosen", "keep going even when it’s hard", "notice when someone is sad", "love people out loud"];
+  const effect = ["makes the whole world feel a little softer", "is one of my favorite things about being alive", "makes me feel so lucky",
+    "could fix a bad day", "feels like sunshine on a kitchen floor", "reminds me what gentle looks like", "makes me proud to know you",
+    "is the kind of magic nobody can fake", "makes ordinary Tuesdays feel like holidays", "makes me feel at home", "stays with me long after",
+    "deserves its own poem"];
+  const adj = ["kind", "funny", "gentle", "fierce", "radiant", "thoughtful", "magical", "steady", "generous", "brilliant", "warm", "brave", "genuine", "delightful", "soft-hearted"];
+  const tail = ["somehow you still seem surprised when people love you", "you make it look effortless", "I don’t think you even know it",
+    "the world is better for it", "that is a rare thing", "you never once make it about yourself", "it’s honestly unfair to everyone else", "I notice, every single time"];
+  const simile = ["the first warm day after a long winter", "a cup of tea someone made just for you", "an open window on a quiet morning",
+    "finding a pressed flower inside a favorite book", "the exact song you needed to hear", "a soft blanket that also tells really good jokes",
+    "sunlight coming through the leaves", "a letter you didn’t expect but needed", "a porch light left on for you", "the smell of rain on warm ground",
+    "a deep breath after a long day", "a little pocket of summer"];
+  const thanks = ["being the person I can tell anything", "making ordinary days feel like little holidays", "never making me feel like too much",
+    "staying through the messy parts", "being exactly, wonderfully you", "laughing at my worst jokes", "believing in me before I did",
+    "being my soft place to land", "showing me what real friendship looks like", "always, always showing up"];
+  const wish = ["gives you back everything you give away", "is full of long naps and loud laughter", "brings you soft mornings and brave adventures",
+    "finds you in all the best ways", "treats you as gently as you treat everyone else", "has far more yeses than nos",
+    "is the one where things start falling into place", "makes you feel as loved as you actually are"];
+  const one = ["who makes home feel like a person", "who makes me braver just by being near", "who can turn my worst day around in five minutes",
+    "I would choose every single time", "I never have to explain myself to", "I’d send every meme to first"];
+  const short = ["You are loved more than you know.", "Your kindness is a quiet kind of superpower.", "I love who I get to be when we talk.",
+    "You are a whole garden of a person.", "Your messages are my favorite notifications.", "You make the world gentler just by being in it.",
+    "There is no one like you, and I’m so glad.", "You are enough, and then so much more.", "You make love look easy.",
+    "You glow, softly, all the time.", "You’re my favorite person to do nothing with.", "I love how deeply you care.",
+    "Everything is better with you in it.", "You are the best kind of ordinary magic.", "I’m proud of who you are and who you’re becoming.",
+    "You are so easy to love it’s almost silly.", "You deserve the softest, sweetest everything.", "I’m so glad the universe put us in each other’s lives.",
+    "You carry so much light. I hope you let people carry you sometimes.", "No distance could ever make you feel far away.",
+    "Of all the corners of the internet, you’re my favorite one.", "I’m so glad we found each other out here.", "A screen can’t dim you at all."];
+  const closer = ["(I mean it, by the way.)", "I love you, birthday girl.", "Happy birthday, Marzieh.", "That’s just the truth.",
+    "Okay, that’s all. For now.", "You’re my favorite.", "Please believe me.", "Don’t you ever forget it.", "xo"];
+
+  const makers = [
+    () => `The way you ${pick(doing)} ${pick(effect)}.`,
+    () => { const [a, b] = two(adj); return `You are so ${a} and so ${b}, and ${pick(tail)}.`; },
+    () => `${pick(["Talking to you feels like", "Talking to you is like"])} ${pick(simile)}.`,
+    () => `Thank you for ${pick(thanks)}.`,
+    () => `I hope this year ${pick(wish)}.`,
+    () => `Out of everyone, you’re the one ${pick(one)}.`,
+    () => pick(short), () => pick(short)
+  ];
+
+  const used = new Set();
+  function newCompliment() {
+    if (ONLY_YOU.length && Math.random() < .25) {
+      const left = ONLY_YOU.filter(s => !used.has(s));
+      if (left.length) { const s = pick(left); used.add(s); return s; }
+    }
+    for (let i = 0; i < 60; i++) {
+      const idx = Math.floor(Math.random() * makers.length);
+      let text = makers[idx]();
+      if (Math.random() < .4) {
+        const j = Math.floor(Math.random() * makers.length);
+        if (j !== idx) text += " " + makers[j]();
+      }
+      if (Math.random() < .35) text += " " + pick(closer);
+      if (!used.has(text)) { used.add(text); return text; }
+    }
+    return pick(short);
+  }
+
+  const note = document.getElementById("note");
+  const stage = document.getElementById("stage");
+  const hint = document.getElementById("hint");
+
+  // shrink the handwriting until the whole message fits the screen
+  function fit() {
+    note.style.fontSize = "";
+    let size = parseFloat(getComputedStyle(note).fontSize);
+    const room = stage.clientHeight - 8;
+    while (note.offsetHeight > room && size > 15) { size -= 1; note.style.fontSize = size + "px"; }
+  }
+
+  function write(text) {
+    note.classList.remove("intro");
+    note.textContent = "";
+    text.split(" ").forEach((word, i) => {
+      const s = document.createElement("span");
+      s.className = "w"; s.style.setProperty("--i", i); s.textContent = word;
+      note.appendChild(s); note.appendChild(document.createTextNode(" "));
+    });
+    fit();
+  }
+
+  window.addEventListener("resize", fit);
+  window.addEventListener("orientationchange", () => setTimeout(fit, 250));
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
+  fit();
+
+  function petals() {
+    const cols = ["#e58aa3", "#f2c4cf", "#ddd0ea", "#f6e6b8", "#cddcc6"];
+    for (let i = 0; i < 8; i++) {
+      const p = document.createElement("span");
+      const size = 9 + Math.random() * 9;
+      p.className = "petal";
+      p.style.cssText = `left:${Math.random() * 96}vw;width:${size}px;height:${size * 1.3}px;background:${pick(cols)};` +
+        `--d:${6 + Math.random() * 5}s;--sx:${(Math.random() * 120 - 60).toFixed(0)}px;--r:${(Math.random() * 200 - 100).toFixed(0)}deg;animation-delay:${Math.random() * 1.2}s`;
+      document.body.appendChild(p);
+      setTimeout(() => p.remove(), 13000);
+    }
+  }
+
+  /* ---------- soft, vague, calming music (made live in the browser, no files) ---------- */
+  let ac, master, echo, chordTimer, bellTimer, musicOn = false, musicTouched = false;
+  const chords = [[130.81, 196.00, 261.63, 329.63], [110.00, 164.81, 220.00, 261.63], [87.31, 130.81, 174.61, 220.00], [98.00, 146.83, 196.00, 246.94]];
+  const bells = [523.25, 587.33, 659.25, 783.99, 880.00, 1046.50];
+
+  function setupAudio() {
+    if (ac) return true;
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return false;
+    ac = new AC();
+    master = ac.createGain(); master.gain.value = 0;
+    const lp = ac.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 2400;
+    master.connect(lp); lp.connect(ac.destination);
+    echo = ac.createDelay(2); echo.delayTime.value = .62;
+    const fb = ac.createGain(); fb.gain.value = .45;
+    const tone = ac.createBiquadFilter(); tone.type = "lowpass"; tone.frequency.value = 1800;
+    const wet = ac.createGain(); wet.gain.value = .5;
+    echo.connect(tone); tone.connect(fb); fb.connect(echo); tone.connect(wet); wet.connect(master);
+    return true;
+  }
+  function pad(freq, t, dur, peak) {
+    const o = ac.createOscillator(), g = ac.createGain();
+    o.type = "triangle"; o.frequency.value = freq; o.detune.value = Math.random() * 8 - 4;
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(peak, t + 3);
+    g.gain.setValueAtTime(peak, t + dur);
+    g.gain.linearRampToValueAtTime(0, t + dur + 3);
+    o.connect(g); g.connect(master);
+    o.start(t); o.stop(t + dur + 3.2);
+  }
+  function bell(freq, t) {
+    const o = ac.createOscillator(), g = ac.createGain();
+    o.type = "sine"; o.frequency.value = freq;
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(.11, t + .03);
+    g.gain.exponentialRampToValueAtTime(.0001, t + 4);
+    o.connect(g); g.connect(master); g.connect(echo);
+    o.start(t); o.stop(t + 4.2);
+  }
+  function chordLoop(i) {
+    if (!musicOn) return;
+    const t = ac.currentTime + .05;
+    chords[i % chords.length].forEach(f => pad(f, t, 8, .1));
+    pad(chords[i % chords.length][0] / 2, t, 8, .09);
+    chordTimer = setTimeout(() => chordLoop(i + 1), 8000);
+  }
+  function bellLoop() {
+    if (!musicOn) return;
+    bell(pick(bells), ac.currentTime + .05);
+    bellTimer = setTimeout(bellLoop, 2200 + Math.random() * 4200);
+  }
+  const musicBtn = document.getElementById("music");
+  function musicStart() {
+    if (!setupAudio()) return;
+    ac.resume();
+    musicOn = true; musicBtn.classList.remove("off");
+    master.gain.cancelScheduledValues(ac.currentTime);
+    master.gain.setTargetAtTime(.95, ac.currentTime, 1.5);
+    clearTimeout(chordTimer); clearTimeout(bellTimer);
+    chordLoop(0); bellLoop();
+  }
+  function musicStop() {
+    musicOn = false; musicBtn.classList.add("off");
+    clearTimeout(chordTimer); clearTimeout(bellTimer);
+    if (ac) {
+      master.gain.cancelScheduledValues(ac.currentTime);
+      master.gain.setTargetAtTime(0, ac.currentTime, .6);
+      setTimeout(() => { if (!musicOn) ac.suspend(); }, 2500);
+    }
+  }
+  musicBtn.addEventListener("click", () => { musicTouched = true; musicOn ? musicStop() : musicStart(); });
+  document.addEventListener("visibilitychange", () => {
+    if (!ac || !musicOn) return;
+    document.hidden ? ac.suspend() : ac.resume();
+  });
+
+  /* ---------- the letter ---------- */
+  // ✏️ Your own paragraphs for the letter go here (memories, inside jokes, things only you two know).
+  // They get mixed in now and then, in your own words.
+  const LETTER_EXTRA = [];
+
+  const L = {
+    greet: ["Dear Marzieh,", "My dearest Marzieh,", "Hi, my Marzieh,", "Hello, beautiful Marzieh,", "Marzieh, my love of a friend,"],
+    open: [
+      "I’ve been sitting here trying to find the right words, and I keep ending up in the same place: I’m just so glad you exist.",
+      "I wanted to write you something slower than a message. Something you can keep. So here I am, pen (sort of) in hand.",
+      "Hi you. Yes, you. I hope you’re somewhere comfortable right now, maybe with something warm to drink, because this one is a little long.",
+      "Some things don’t fit in a text. This is one of them, so I’m giving it a whole page.",
+      "It’s your birthday, which means I get to be extra soft and extra honest. Fair warning."
+    ],
+    love: [
+      "I love you more than I know how to type. Distance and screens and time zones haven’t made it smaller. If anything, they showed me how much room you take up in my heart.",
+      "Meeting you online turned out to be one of the best things that has ever happened to me. Out of all the people and all the corners of the internet, I found you, and I would choose you again every single time.",
+      "You are not ‘just’ an online friend to me. You are real. Our friendship is real, and the way you make me feel is the realest thing.",
+      "Talking to you is the part of my day I look forward to most. You make ordinary hours feel brighter without even trying.",
+      "I think about you a lot, you know. Something small will happen and my very first thought is, ‘I have to tell Marzieh.’",
+      "Thank you for letting me into your life, your stories, your late-night thoughts. I never take any of it for granted.",
+      "I love how you care, how you laugh, how you get excited, how you are. There isn’t a single version of you I would want to change."
+    ],
+    self: [
+      "I need you to hear something, and I need you to really let it in: you are allowed to be gentle with yourself. The way you love everyone else? You deserve that exact same softness turned back toward you.",
+      "On the days you feel like you’re not enough, please remember that I’m looking at you from the outside, and from here you are so, so much. Not in spite of anything. Just all of you.",
+      "You don’t have to earn rest. You don’t have to earn love. You don’t have to be perfect or productive or cheerful to deserve good things. You only have to be you, and that is already more than plenty.",
+      "Be patient with yourself. Nobody scolds a flower for taking its time to bloom, and you are a whole garden.",
+      "If you ever catch yourself talking to yourself in a way you would never talk to me, stop and try again. Talk to yourself like someone you adore. (I adore you, so you have plenty of examples to learn from.)",
+      "Your feelings are not too much. Your softness is not a weakness. Your voice is not a burden. Say it back to me, out loud. I’ll wait.",
+      "I hope that someday you can look in the mirror and see even a tiny bit of what I see: someone warm, brilliant, and deeply, deeply worth loving.",
+      "Some days will be heavy. On those days, one small kind thing for yourself counts: a glass of water, a blanket, a song you love. I’m proud of you for every one of them."
+    ],
+    de: [
+      "And when I finally come to Germany? I’m doing whatever you want. Seriously. You pick the places, the food, the plans, the pace. If you want to wander around for six hours, I’m in. If you want to do absolutely nothing, I’m even more in.",
+      "When I come to Germany, you are in charge of everything. Your country, your rules. I’ll just follow you around happily with a ridiculous grin on my face.",
+      "I’ve already started imagining it: us finally in the same place, no screens, just actual you. I’m going to hug you so tightly you’ll have to negotiate to get free.",
+      "Just so you know, when I visit I’ll carry your bags, try every snack you tell me to, and go wherever you point. Consider me yours for the whole trip.",
+      "Someday we’ll sit across from each other with a coffee in our hands, and I’ll finally see you light up in real life. I can’t wait for that day.",
+      "When I come to Germany, we’re taking the cutest photos, eating way too much, and staying out until we’re too sleepy to care. All on your schedule, always."
+    ],
+    cute: [
+      "Also, small important announcement: you are adorable. That is a fact and it is not up for debate.",
+      "Drink some water. Eat something nice. Wear the comfy socks. That’s an order from your biggest fan.",
+      "If I could, I’d mail you a little box with some sunshine, a cup of tea, and a hug. Pretend it arrived. Pretend it fits.",
+      "I’m sending you the biggest, squishiest, most ridiculous virtual hug right now. Can you feel it? Squeeze back.",
+      "Fun fact: you’ve been on my mind in the nicest way all day, and I’m not even sorry about it.",
+      "You’re my favorite notification, my favorite chat, my favorite person to be silly with.",
+      "Please remember that you are someone’s favorite person. (Mine. It’s me. I’m the someone.)",
+      "Imagine a very small cartoon heart floating above your head right now. That’s me. I did that."
+    ],
+    bday: [
+      "Happy birthday, by the way. I hope this year gives you every soft, good, golden thing.",
+      "Another year of you, and the world gets lucky all over again.",
+      "Today is your day, so be extra kind to yourself and let people spoil you a little. Let me spoil you a little, too, from far away.",
+      "I hope your birthday feels like a warm blanket: cozy, safe, and a little bit sparkly."
+    ],
+    close: ["With all my love,", "Always yours,", "Squeezing you from far away,", "Love you endlessly,", "Yours, truly,"],
+    name: ["Burhan", "your Burhan", "Burhan, who adores you", "your friend, Burhan"],
+    ps: [
+      "P.S. Drink some water.", "P.S. I meant every single word.",
+      "P.S. You can read this again whenever you need it.", "P.S. Tell me what you’re thinking. I always want to know.",
+      "P.S. Press the heart again if you need more. There’s always more."
+    ]
+  };
+
+  const decks = {};
+  function shuffle(a) {
+    for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+    return a;
+  }
+  // draws without repeating until the whole pile has been used, so each letter feels new
+  function fresh(name, pool) {
+    if (!decks[name] || !decks[name].length) decks[name] = shuffle(pool.slice());
+    return decks[name].pop();
+  }
+
+  function buildLetter() {
+    const out = [{ cls: "greet", text: fresh("greet", L.greet) }];
+    const add = (name, pool) => out.push({ cls: "", text: fresh(name, pool) });
+    add("open", L.open);
+    add("love", L.love);
+    add("self", L.self);
+    if (Math.random() < .4) add("self", L.self);
+    add("de", L.de);
+    if (LETTER_EXTRA.length && Math.random() < .6) add("extra", LETTER_EXTRA);
+    if (Math.random() < .7) add("cute", L.cute);
+    if (Math.random() < .55) add("bday", L.bday);
+    out.push({ cls: "sign", text: fresh("close", L.close) + "\n" + fresh("name", L.name) });
+    if (Math.random() < .6) out.push({ cls: "ps", text: fresh("ps", L.ps) });
+    return out;
+  }
+
+  const overlay = document.getElementById("overlay");
+  const paper = document.getElementById("paper");
+  const letterBody = document.getElementById("letterBody");
+  const envelope = document.getElementById("envelope");
+  const closeBtn = document.getElementById("closeLetter");
+  const again = document.getElementById("again");
+
+  function renderLetter() {
+    letterBody.textContent = "";
+    buildLetter().forEach((part, i) => {
+      const p = document.createElement("p");
+      p.className = "lp " + part.cls;
+      p.style.animationDelay = (i * 0.5) + "s";
+      p.textContent = part.text;
+      letterBody.appendChild(p);
+    });
+    paper.scrollTop = 0;
+  }
+  function openLetter() {
+    if (!musicTouched) { musicTouched = true; musicStart(); }
+    renderLetter();
+    overlay.classList.add("open");
+    overlay.setAttribute("aria-hidden", "false");
+    closeBtn.focus({ preventScroll: true });
+  }
+  function closeLetter() {
+    overlay.classList.remove("open");
+    overlay.setAttribute("aria-hidden", "true");
+    envelope.focus({ preventScroll: true });
+  }
+  envelope.addEventListener("click", openLetter);
+  closeBtn.addEventListener("click", closeLetter);
+  overlay.addEventListener("click", e => { if (e.target === overlay) closeLetter(); });
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && overlay.classList.contains("open")) closeLetter(); });
+  again.addEventListener("click", () => {
+    letterBody.style.opacity = 0;
+    setTimeout(() => { renderLetter(); letterBody.style.opacity = 1; }, 350);
+  });
+  letterBody.style.transition = "opacity .35s ease";
+
+  /* ---------- the questions (only the very first time) ---------- */
+  const DONE_KEY = "for-marzieh-questions-done";
+  const store = {
+    get() {
+      try { if (localStorage.getItem(DONE_KEY) === "1") return true; } catch (e) {}
+      try { return document.cookie.indexOf(DONE_KEY + "=1") !== -1; } catch (e) { return false; }
+    },
+    set() {
+      try { localStorage.setItem(DONE_KEY, "1"); } catch (e) {}
+      try { document.cookie = DONE_KEY + "=1; max-age=63072000; path=/; SameSite=Lax"; } catch (e) {}
+    },
+    clear() {
+      try { localStorage.removeItem(DONE_KEY); } catch (e) {}
+      try { document.cookie = DONE_KEY + "=; max-age=0; path=/"; } catch (e) {}
+    }
+  };
+  const gate = document.getElementById("gate"), card = document.getElementById("gcard");
+  const gq = document.getElementById("gq"), gyes = document.getElementById("gyes"), gno = document.getElementById("gno");
+  const gmsg = document.getElementById("gmsg"), gdots = document.getElementById("gdots"), choices = document.getElementById("choices");
+
+  // her first, then her beauty, then her day, then me, then the reveal
+  const QS = [
+    { q: "Do you love yourself?", yes: "yes 💗", mode: "run" },
+    { q: "Are you the most beautiful girl ever?", yes: "obviously", mode: "wrong" },
+    { q: "Do you deserve the best birthday ever?", yes: "yes!", mode: "autocorrect" },
+    { q: "Do you love me?", yes: "yes 🥹", mode: "error" },
+    { q: "Do you really want to see this?", yes: "yes, show me", mode: "germany" }
+  ];
+  let qi = 0, tries = 0, locked = false, noIsYes = false;
+
+  const say = t => { gmsg.textContent = t; };
+  const wake = () => { if (!musicTouched) { musicTouched = true; musicStart(); } };
+
+  function render() {
+    const Q = QS[qi];
+    tries = 0; locked = false; noIsYes = false;
+    gq.textContent = Q.q; gyes.textContent = Q.yes; gno.textContent = "no";
+    gno.className = "gbtn"; gno.style.transform = ""; gyes.style.transform = ""; gno.hidden = false;
+    gno.disabled = false; gyes.disabled = false; choices.style.display = "";
+    choices.className = "choices" + (Q.mode === "run" ? " tall" : "");
+    say("");
+    gdots.textContent = "";
+    QS.forEach((_, i) => { const s = document.createElement("span"); s.textContent = i < qi ? "♥" : "♡"; gdots.appendChild(s); });
+    card.style.animation = "none"; void card.offsetWidth; card.style.animation = "";
+  }
+
+  function shake() { gq.classList.remove("shake"); void gq.offsetWidth; gq.classList.add("shake"); }
+
+  // the ‘no’ button runs somewhere else inside the box
+  function flee() {
+    const cw = choices.clientWidth, ch = choices.clientHeight, bw = gno.offsetWidth, bh = gno.offsetHeight;
+    const yx = gyes.offsetLeft + gyes.offsetWidth / 2, yy = gyes.offsetTop + gyes.offsetHeight / 2;
+    let tx = cw / 2, ty = ch / 2;
+    for (let k = 0; k < 20; k++) {
+      tx = bw / 2 + Math.random() * (cw - bw); ty = bh / 2 + Math.random() * (ch - bh);
+      if (Math.hypot(tx - yx, ty - yy) > 120) break;
+    }
+    gno.style.transform = `translate(${tx - (gno.offsetLeft + bw / 2)}px, ${ty - (gno.offsetTop + bh / 2)}px)`;
+  }
+  function bump() {
+    tries++;
+    const M = ["nope 😌", "too slow!", "the ‘no’ button is very shy", "it loves you too much to let you say that", "okay okay, just press yes 🥹"];
+    say(M[Math.min(tries - 1, M.length - 1)]);
+  }
+
+  gno.addEventListener("pointerenter", e => { if (QS[qi].mode === "run" && e.pointerType === "mouse") { flee(); bump(); } });
+  gno.addEventListener("pointerdown", e => { if (QS[qi].mode === "run") { e.preventDefault(); flee(); } });
+
+  gno.addEventListener("click", () => {
+    if (locked) return;
+    wake();
+    const mode = QS[qi].mode;
+    if (mode === "run") { flee(); bump(); return; }
+    if (mode === "wrong") {
+      tries++; shake();
+      say(["Wrong answer ❌", "Still wrong. Wow. 🙄", "Incorrect. The correct answer is yes. 💅", "Try looking in a mirror, then answer again 🪞"][Math.min(tries - 1, 3)]);
+      gno.style.transform = `scale(${Math.max(.45, 1 - tries * .17)})`;
+      gyes.style.transform = `scale(${Math.min(1.3, 1 + tries * .1)})`;
+      return;
+    }
+    if (mode === "autocorrect") {
+      if (noIsYes) { next(); return; }
+      noIsYes = true; gno.textContent = "yes"; gno.classList.add("yes"); say("oops, autocorrect changed it 🤭");
+      return;
+    }
+    if (mode === "error") {
+      locked = true; gno.disabled = true; gyes.disabled = true; say("Processing your answer…");
+      setTimeout(() => say("Error 404: ‘no’ not found. Counting that as a yes 💗"), 1200);
+      setTimeout(next, 3200);
+      return;
+    }
+    if (mode === "germany") {
+      say("‘No’ has been sent to Germany ✈️ It’ll be waiting there when I visit.");
+      gno.classList.add("gone"); setTimeout(() => { gno.hidden = true; }, 900);
+    }
+  });
+  gyes.addEventListener("click", () => { if (!locked) { wake(); next(); } });
+
+  function next() {
+    locked = true;
+    card.classList.add("leave");
+    setTimeout(() => {
+      qi++;
+      card.classList.remove("leave");
+      if (qi >= QS.length) return finish();
+      render();
+    }, 400);
+  }
+  function finish() {
+    store.set(); // remembered on this device, so the questions never come back
+    gq.textContent = "I knew you would say yes 🥹";
+    choices.style.display = "none";
+    say("happy birthday, Marzieh. this is all for you.");
+    gdots.textContent = "♥♥♥♥♥";
+    card.style.animation = "none"; void card.offsetWidth; card.style.animation = "";
+    petals();
+    setTimeout(() => {
+      gate.classList.add("fade");
+      setTimeout(() => { gate.hidden = true; }, 750);
+    }, 3200);
+  }
+
+  if (location.hash === "#questions") store.clear(); // add #questions to the file’s address to see them again
+  if (!store.get()) { gate.hidden = false; render(); }
+
+  /* ---------- offline support + a one-time nudge to add me to the home screen ---------- */
+  if ("serviceWorker" in navigator && location.protocol.indexOf("http") === 0) {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  }
+  (function () {
+    const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    const standalone = window.navigator.standalone === true || (window.matchMedia && matchMedia("(display-mode: standalone)").matches);
+    let seen = false; try { seen = localStorage.getItem("for-marzieh-hint") === "1"; } catch (e) {}
+    if (!ios || standalone || seen || location.protocol.indexOf("http") !== 0) return;
+    const box = document.getElementById("install");
+    box.hidden = false;
+    document.getElementById("installLater").addEventListener("click", () => {
+      try { localStorage.setItem("for-marzieh-hint", "1"); } catch (e) {}
+      box.classList.add("fade"); setTimeout(() => { box.hidden = true; }, 700);
+    });
+  })();
+
+  let busy = false;
+  document.getElementById("heart").addEventListener("click", () => {
+    if (busy) return;
+    busy = true;
+    if (!musicTouched) { musicTouched = true; musicStart(); }
+    hint.classList.add("gone");
+    petals();
+    note.classList.add("out");
+    setTimeout(() => {
+      write(newCompliment());
+      note.classList.remove("out");
+      busy = false;
+    }, 550);
+  });
+</script>
+</body>
+</html>
